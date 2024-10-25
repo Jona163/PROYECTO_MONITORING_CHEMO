@@ -77,3 +77,16 @@ def shutdown():
         return jsonify({"status": "Shutting down..."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 3.9 Denegar el acceso a páginas web específicas
+@app.route('/block_website', methods=['POST'])
+def block_website():
+    try:
+        data = request.get_json()
+        website = data.get('website')
+        # Agregar el dominio al archivo hosts de Windows para bloquearlo
+        with open(r"C:\Windows\System32\drivers\etc\hosts", "a") as file:
+            file.write(f"127.0.0.1 {website}\n")
+        return jsonify({"status": f"Website {website} blocked."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -68,3 +68,12 @@ def unblock_input():
         return jsonify({"status": "Input unblocked."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 3.8 Apagar el PC remotamente
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    try:
+        os.system("shutdown /s /t 1")
+        return jsonify({"status": "Shutting down..."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

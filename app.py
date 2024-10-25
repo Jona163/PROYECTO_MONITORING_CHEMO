@@ -33,6 +33,12 @@ def handle_message(msg):
 # 3.3 Exhibir un cliente (manejar múltiples PCs)
 clients = {}
 
+@socketio.on('disconnect')
+def disconnect_client():
+    client_id = [k for k, v in clients.items() if v == request.sid]
+    if client_id:
+        clients.pop(client_id[0])
+        print(f'Client {client_id[0]} disconnected.')
 @socketio.on('register')
 def register_client(data):
     client_id = data.get('client_id')

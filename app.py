@@ -50,3 +50,12 @@ def register_client(data):
 def get_logs():
     # Aquí podrías retornar registros almacenados en un archivo o base de datos
     return jsonify({"log": "Mostrar registros de acciones del servidor."})
+
+# 3.6 Bloquear teclado y mouse
+@app.route('/block_input', methods=['POST'])
+def block_input():
+    try:
+        ctypes.windll.user32.BlockInput(True)
+        return jsonify({"status": "Input blocked."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -16,3 +16,10 @@ socketio = SocketIO(app)
 @app.route('/screenshot', methods=['GET'])
 def screenshot():
     try:
+        screenshot = pyautogui.screenshot()
+        img_io = io.BytesIO()
+        screenshot.save(img_io, 'JPEG')
+        img_io.seek(0)
+        return Response(img_io, mimetype='image/jpeg')
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

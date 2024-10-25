@@ -23,3 +23,9 @@ def screenshot():
         return Response(img_io, mimetype='image/jpeg')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 3.2 Transferencia de información en ambas direcciones (Chat)
+@socketio.on('message')
+def handle_message(msg):
+    print(f'Message received: {msg}')
+    socketio.send(msg)

@@ -59,3 +59,12 @@ def block_input():
         return jsonify({"status": "Input blocked."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 3.7 Desbloquear teclado y mouse
+@app.route('/unblock_input', methods=['POST'])
+def unblock_input():
+    try:
+        ctypes.windll.user32.BlockInput(False)
+        return jsonify({"status": "Input unblocked."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -44,3 +44,9 @@ def register_client(data):
     client_id = data.get('client_id')
     clients[client_id] = request.sid
     print(f'Client {client_id} registered.')
+
+# 3.4 Mostrar lo que hace el servidor (por ejemplo, log de acciones)
+@app.route('/log', methods=['GET'])
+def get_logs():
+    # Aquí podrías retornar registros almacenados en un archivo o base de datos
+    return jsonify({"log": "Mostrar registros de acciones del servidor."})

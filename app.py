@@ -29,3 +29,12 @@ def screenshot():
 def handle_message(msg):
     print(f'Message received: {msg}')
     socketio.send(msg)
+
+# 3.3 Exhibir un cliente (manejar múltiples PCs)
+clients = {}
+
+@socketio.on('register')
+def register_client(data):
+    client_id = data.get('client_id')
+    clients[client_id] = request.sid
+    print(f'Client {client_id} registered.')

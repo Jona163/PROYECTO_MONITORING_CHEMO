@@ -90,3 +90,22 @@ def block_website():
         return jsonify({"status": f"Website {website} blocked."})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# 3.10 Denegar ping y permitir ping remotamente
+@app.route('/set_ping', methods=['POST'])
+def set_ping():
+    try:
+        data = request.get_json()
+        allow_ping = data.get('allow', True)
+        firewall_command = "netsh advfirewall firewall add rule name=\"Block ICMP\" protocol=icmpv4:8,any dir=in action=block"
+        if allow_ping:
+            firewall_command = "netsh advfirewall firewall delete rule name=\"Block ICMP\""
+        os.system(firewall_command)
+        status = "allowed" if allow_ping else "blocked"
+        return jsonify({"status": f"Ping {status}."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    # Ejecutar la aplicación
+    socketio.run(app, host='0.0.0.0', port=5000)

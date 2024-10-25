@@ -1,5 +1,3 @@
-Aquí tienes un `README.md` con más estilo y detalles para tu proyecto. Incluye formato Markdown adicional y enlaces a tu repositorio:
-
 ```markdown
 # 🚀 Proyecto de Monitoreo Remoto
 
@@ -112,11 +110,3 @@ Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
 
 Para más información, visita el [repositorio en GitHub](https://github.com/Jona163/PROYECTO_MONITORING_CHEMO).
 ```
-
-### Estilo y formato
-
-- Se han añadido emojis para hacer el documento más visual y amigable.
-- Se ha utilizado un formato más estructurado y claro para cada sección.
-- Se ha incluido un enlace directo al repositorio de GitHub en la parte inferior.
-
-Puedes copiar y pegar este contenido en tu archivo `README.md`. Si deseas realizar más cambios o agregar detalles específicos, ¡házmelo saber!

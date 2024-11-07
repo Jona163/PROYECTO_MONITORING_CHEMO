@@ -3,7 +3,6 @@ import websockets
 import base64
 import os
 import json
-import time
 
 # Ruta para almacenar archivos enviados por el cliente
 UPLOAD_FOLDER = "uploads/"
@@ -18,15 +17,15 @@ clients = set()
 # Función para enviar la pantalla (en formato de imagen base64)
 async def send_image(websocket):
     try:
-        # Simula una imagen de pantalla en vivo, reemplaza esto por un método real
         while True:
+            # Simulación de captura de pantalla
             with open("screenshot.jpg", "rb") as image_file:
                 encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
                 image_message = json.dumps({"type": "image", "data": encoded_image})
                 await websocket.send(image_message)
-            await asyncio.sleep(1)  # Enviar imagen cada 1 segundo (puedes ajustar esto)
-    except Exception as e:
-        print(f"Error al enviar la imagen: {e}")
+            await asyncio.sleep(1)  # Enviar imagen cada 1 segundo (ajusta según tus necesidades)
+    except websockets.exceptions.ConnectionClosed:
+        print("Cliente desconectado durante el envío de imagen")
 
 # Función para manejar los mensajes de los clientes
 async def handle_client(websocket, path):
@@ -69,21 +68,18 @@ async def handle_client(websocket, path):
     finally:
         # Eliminar cliente de la lista cuando se desconecta
         clients.remove(websocket)
+        print(f"Cliente {websocket.remote_address} removido")
 
 # Función principal para ejecutar el servidor WebSocket
 async def main():
-    server = await websockets.serve(handle_client, "localhost", 8765)
-    print("Servidor WebSocket iniciado en ws://localhost:8765")
+    server = await websockets.serve(handle_client, "172.168.3.131", 8765)
+    print("Servidor WebSocket iniciado en ws://172.168.3.131:8765")
     
-    # Mantener el servidor activo
-    try:
-        while True:
-            await asyncio.sleep(3600)  # Mantener el servidor activo durante 1 hora a la vez
-    except KeyboardInterrupt:
-        print("Servidor detenido manualmente")
-        server.close()
-        await server.wait_closed()
+    await server.wait_closed()  # Mantiene el servidor activo hasta que sea manualmente cerrado
 
 # Ejecutar el servidor WebSocket
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Servidor detenido manualmente")

@@ -1,0 +1,227 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #282c34;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  text-align: center;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.live-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-container {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.messages {
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+input {
+  width: 70%;
+  padding: 10px;
+  margin-right: 5px;
+}
+
+button {
+  padding: 10px;
+}
+
+.message {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.message.sent {
+  background-color: #80DEEA;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #ffffff;
+  align-self: flex-start;
+  border: 1px solid #ddd;
+}
+
+.form-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+input[type="text"] {
+  flex-grow: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.file-container {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #cccccc50;
+  border-radius: 10px;
+  background-color: #f9f9f945;
+}
+
+.file-container h2 {
+  margin-bottom: 10px;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #80DEEA;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.custom-file-upload:hover {
+  background-color: #72d0e0;
+}
+
+.send-file-button {
+  display: inline-block;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #008CBA;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.send-file-button:hover {
+  background-color: #007B9A;
+}
+
+.messages .message a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.messages .message a:hover {
+  text-decoration: underline;
+}
+
+/* Media queries para hacer el diseño responsivo */
+@media (max-width: 768px) {
+  .container {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .image-container {
+    height: 300px; /* Reduce la altura en pantallas pequeñas */
+  }
+
+  .form-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px; /* Añadir espacio en la parte inferior en dispositivos móviles */
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .messages {
+    max-height: 150px;
+  }
+
+  .file-container {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .image-container {
+    height: 200px; /* Ajuste adicional para pantallas muy pequeñas */
+  }
+
+  .message {
+    max-width: 100%;
+  }
+
+  .custom-file-upload, .send-file-button {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+}

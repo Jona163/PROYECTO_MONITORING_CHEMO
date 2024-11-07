@@ -1,4 +1,3 @@
-```markdown
 # 🚀 Proyecto de Monitoreo Remoto
 
 ¡Bienvenido al **Proyecto de Monitoreo Remoto**! Este software permite el monitoreo y control remoto de computadoras a través de una interfaz web intuitiva, utilizando Flask y React. 

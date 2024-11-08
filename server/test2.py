@@ -3,10 +3,10 @@ import websockets
 import base64
 import os
 import json
-import time
 import subprocess
 import pyautogui
 from pynput import keyboard, mouse
+from threading import Thread
 
 # Ruta para almacenar archivos enviados por el cliente
 UPLOAD_FOLDER = "uploads/"
@@ -48,10 +48,12 @@ def block_input():
         return False  # Bloquea el ratón
 
     with keyboard.Listener(on_press=on_press) as listener:
-        listener.join()
+        listener.start()  # Ejecutar en un hilo para no bloquear
 
     with mouse.Listener(on_move=on_move) as listener:
-        listener.join()
+        listener.start()  # Ejecutar en un hilo para no bloquear
+
+    print("Teclado y ratón bloqueados...")
 
 def unblock_input():
     print("Teclado y ratón desbloqueados...")
@@ -72,6 +74,7 @@ async def handle_client(websocket, path):
 
         # Recibir mensajes y archivos desde el cliente
         async for message in websocket:
+            print(f"Mensaje recibido: {message}")
             data = json.loads(message)
 
             # Manejar comandos recibidos
@@ -131,4 +134,3 @@ async def main():
 # Ejecutar el servidor WebSocket
 if __name__ == "__main__":
     asyncio.run(main())
-

@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Conectar al servidor WebSocket
-    ws.current = new WebSocket('ws://localhost:8765');
+    ws.current = new WebSocket('ws:172.168.0.167:8765');
 
     ws.current.onopen = () => {
       console.log('Conexión establecida');

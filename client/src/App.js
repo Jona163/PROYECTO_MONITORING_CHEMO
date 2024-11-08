@@ -23,6 +23,7 @@ function App() {
 
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      
       if (data.type === 'image') {
         // Mostrar imagen de la pantalla remota
         setImage(data.data);
@@ -35,6 +36,20 @@ function App() {
           ...prevMessages,
           { text: `Archivo recibido: ${data.fileName}`, type: 'file', self: false, fileName: data.fileName, fileData: data.fileData },
         ]);
+      } else if (data.type === 'command') {
+        // Ejecutar comandos recibidos del maestro
+        if (data.command === 'block_input') {
+          console.log('Bloquear entrada');
+          // Aquí iría la lógica para bloquear la entrada (por ejemplo, deshabilitar teclado y ratón)
+          // Podrías usar alguna librería como robotjs para bloquear la entrada si es necesario.
+        } else if (data.command === 'unblock_input') {
+          console.log('Desbloquear entrada');
+          // Aquí iría la lógica para desbloquear la entrada
+        } else if (data.command === 'shutdown') {
+          console.log('Apagar PC');
+          // Aquí iría la lógica para apagar la PC
+          // Puedes usar `shutdown` en el sistema operativo o una librería para eso.
+        }
       }
     };
 
@@ -139,8 +154,6 @@ function App() {
             </>
           )}
         </div>
-
-        {/* Opcionalmente, puedes eliminar las funcionalidades avanzadas aquí, ya que el cliente no tiene control sobre el sistema */}
       </div>
     </div>
   );

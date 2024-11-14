@@ -13,7 +13,7 @@ function App() {
   const imageRef = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://localhost:8765');
+    ws.current = new WebSocket('ws://172.168.0.167:8765');
 
     ws.current.onopen = () => {
       console.log('Conexión establecida');
@@ -21,16 +21,20 @@ function App() {
     };
 
     ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'image') {
-        setImage(data.data);
-      } else if (data.type === 'message') {
-        setMessages((prevMessages) => [...prevMessages, { text: data.data, type: 'message', self: false }]);
-      } else if (data.type === 'file') {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { text: `Archivo recibido: ${data.fileName}`, type: 'file', self: false, fileName: data.fileName, fileData: data.fileData },
-        ]);
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'image') {
+          setImage(data.data);
+        } else if (data.type === 'message') {
+          setMessages((prevMessages) => [...prevMessages, { text: data.data, type: 'message', self: false }]);
+        } else if (data.type === 'file') {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: `Archivo recibido: ${data.fileName}`, type: 'file', self: false, fileName: data.fileName, fileData: data.fileData },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
       }
     };
 
@@ -82,12 +86,14 @@ function App() {
   };
 
   // Funciones para funcionalidades avanzadas
-  const handleControlPC = () => ws.current.send(JSON.stringify({ type: 'control_pc' }));
-  const handleBlockKeyboardMouse = () => ws.current.send(JSON.stringify({ type: 'block_keyboard_mouse' }));
-  const handleUnblockKeyboardMouse = () => ws.current.send(JSON.stringify({ type: 'unblock_keyboard_mouse' }));
-  const handleShutdownPC = () => ws.current.send(JSON.stringify({ type: 'shutdown_pc' }));
-  const handleRestrictWebAccess = () => ws.current.send(JSON.stringify({ type: 'restrict_web_access', url: 'https://example.com' }));
-  const handlePingControl = () => ws.current.send(JSON.stringify({ type: 'ping_control' }));
+  const handleControlPC = () => ws.current.send(JSON.stringify({ action: 'control_pc' }));
+  const handleBlockKeyboardMouse = () => ws.current.send(JSON.stringify({ action: 'block_input' }));
+  const handleUnblockKeyboardMouse = () => ws.current.send(JSON.stringify({ action: 'unblock_input' }));
+  const handleShutdownPC = () => ws.current.send(JSON.stringify({ action: 'shutdown' }));
+  const handleRestrictWebAccess = () => ws.current.send(JSON.stringify({ action: 'block_sites', sites: ['https://www.facebook.com/'] }));
+  const handleAllowPing = () => ws.current.send(JSON.stringify({ action: 'allow_ping' }));
+  const handleBlockPing = () => ws.current.send(JSON.stringify({ action: 'block_ping' }));
+
 
   return (
     <div className="App">
@@ -152,11 +158,11 @@ function App() {
           <button onClick={handleUnblockKeyboardMouse}>Desbloquear Teclado y Ratón</button>
           <button onClick={handleShutdownPC}>Apagar PC Remota</button>
           <button onClick={handleRestrictWebAccess}>Restringir Acceso a Web</button>
-          <button onClick={handlePingControl}>Control de Ping</button>
+          <button onClick={handleAllowPing}>Permitir Ping</button>
+          <button onClick={handleBlockPing}>Bloquear Ping</button>
         </div>
       </div>
     </div>
   );
 }
-
 export default App;

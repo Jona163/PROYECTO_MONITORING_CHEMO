@@ -5,10 +5,11 @@ import os
 import json
 import time
 import subprocess  # Para comandos del sistema como apagado
-import ctypes      # Para el bloqueo/desbloqueo de teclado y ratón en Windows
 
 # Ruta para almacenar archivos enviados por el cliente
 UPLOAD_FOLDER = "uploads/"
+# Ruta para los scripts PowerShell
+SCRIPT_FOLDER = "scripts/"
 
 # Asegúrate de que la carpeta de uploads exista
 if not os.path.exists(UPLOAD_FOLDER):
@@ -17,15 +18,15 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Lista de conexiones activas
 clients = set()
 
-# Función para bloquear y desbloquear el teclado y el ratón
+# Función para bloquear y desbloquear el teclado y el ratón usando PowerShell
 def toggle_keyboard_mouse(block=True):
-    user32 = ctypes.windll.User32
-    if block:
-        user32.BlockInput(True)
-        print("Teclado y ratón bloqueados.")
-    else:
-        user32.BlockInput(False)
-        print("Teclado y ratón desbloqueados.")
+    script_name = "block_input.ps1" if block else "unblock_input.ps1"
+    script_path = os.path.join(SCRIPT_FOLDER, script_name)
+    try:
+        subprocess.run(["powershell", "-File", script_path], check=True)
+        print("Teclado y ratón bloqueados." if block else "Teclado y ratón desbloqueados.")
+    except Exception as e:
+        print(f"Error ejecutando {script_name}: {e}")
 
 # Función para enviar la pantalla (en formato de imagen base64)
 async def send_image(websocket):

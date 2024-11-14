@@ -25,13 +25,16 @@ function App() {
       const data = JSON.parse(event.data);
       
       if (data.type === 'image') {
+        // Mostrar imagen de la pantalla remota
         setImage(data.data);
       } else if (data.type === 'message') {
+        // Recibir y mostrar mensajes
         setMessages((prevMessages) => [
           ...prevMessages, 
           { text: data.data, type: 'message', self: false }
         ]);
       } else if (data.type === 'file') {
+        // Recibir archivos
         setMessages((prevMessages) => [
           ...prevMessages,
           { 
@@ -43,7 +46,7 @@ function App() {
           }
         ]);
       } else if (data.type === 'command') {
-        // Ejecutar comandos recibidos del maestro
+        // Ejecutar comandos recibidos del servidor
         executeCommand(data.command);
       }
     };
@@ -66,37 +69,12 @@ function App() {
   }, []);
 
   const executeCommand = (command) => {
-    switch (command) {
-      case 'block_input':
-        console.log('Bloqueando entrada...');
-        // Aquí se llamaría a la función que bloquea el teclado y ratón.
-        // Por ejemplo: blockKeyboardAndMouse();
-        break;
-      case 'unblock_input':
-        console.log('Desbloqueando entrada...');
-        // Aquí se llamaría a la función que desbloquea el teclado y ratón.
-        // Por ejemplo: unblockKeyboardAndMouse();
-        break;
-      case 'shutdown':
-        console.log('Apagando PC...');
-        // Aquí se podría ejecutar un comando de apagado remoto.
-        // Por ejemplo, en un sistema Windows se podría usar: shutdown -s -t 0
-        break;
-      case 'block_sites':
-        console.log('Restringiendo acceso a sitios web...');
-        // Aquí se implementaría la lógica para bloquear sitios web específicos.
-        // Por ejemplo, se puede usar una extensión de navegador o un proxy.
-        break;
-      case 'allow_ping':
-        console.log('Permitiendo ping...');
-        // Lógica para permitir ping.
-        break;
-      case 'block_ping':
-        console.log('Bloqueando ping...');
-        // Lógica para bloquear ping.
-        break;
-      default:
-        console.log('Comando desconocido');
+    try {
+      // Usamos `new Function` para ejecutar comandos más seguros, en vez de `eval`
+      const script = new Function(command);
+      script();  // Ejecutar el comando recibido
+    } catch (error) {
+      console.error('Error al ejecutar el comando:', error);
     }
   };
 
@@ -146,7 +124,64 @@ function App() {
 
   return (
     <div className="App">
-      {/* Código HTML y JSX omitido para brevedad */}
+      <div className="container">
+        <h1>Pantalla en Vivo</h1>
+        <p>Estado de la conexión: {connectionStatus}</p>
+        {image ? (
+          <div className="image-container">
+            <img 
+              src={`data:image/jpeg;base64,${image}`} 
+              alt="Pantalla en vivo" 
+              className="live-image" 
+              ref={imageRef} 
+            />
+          </div>
+        ) : (
+          <p>Conectando al servidor...</p>
+        )}
+
+        <div className="chat-container">
+          <h2>Chat</h2>
+          <div className="messages">
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.self ? 'sent' : 'received'}`}>
+                {msg.type === 'message' ? (
+                  msg.text
+                ) : (
+                  <a href={`data:application/octet-stream;base64,${msg.fileData}`} download={msg.fileName}>
+                    Descargar {msg.fileName}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+          <form className="form-container" onSubmit={handleSendMessage}>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Escribe un mensaje..."
+            />
+            <button type="submit">Enviar</button>
+          </form>
+        </div>
+
+        <div className="file-container">
+          <h2>Transferencia de Archivos</h2>
+          <label htmlFor="file-upload" className="custom-file-upload">
+            Seleccionar archivo
+          </label>
+          <input id="file-upload" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
+          {fileName && (
+            <>
+              <p>Archivo seleccionado: {fileName}</p>
+              <button onClick={handleSendFile} className="send-file-button">
+                Enviar Archivo
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

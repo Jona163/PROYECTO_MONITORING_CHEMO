@@ -54,7 +54,8 @@ async def handle_client(websocket, path):
     print(f"Nuevo cliente conectado: {websocket.remote_address}")
 
     try:
-        await send_image(websocket)
+        # Envía la pantalla al cliente
+        asyncio.create_task(send_image(websocket))
 
         # Recibir mensajes y comandos desde el cliente maestro
         async for message in websocket:
@@ -94,16 +95,12 @@ async def handle_client(websocket, path):
             elif data["action"] == "unblock_input":
                 toggle_keyboard_mouse(block=False)
 
-            # Otras acciones específicas
-            elif data["action"] == "control_pc":
-                # Aquí puedes implementar control remoto adicional
-                pass
-
+            # Bloqueo de sitios
             elif data["action"] == "block_sites":
                 restricted_sites = data.get("sites", [])
-                # Implementar restricción de acceso a sitios web
                 print(f"Acceso restringido a: {restricted_sites}")
 
+            # Control de ping
             elif data["action"] == "allow_ping":
                 print("Ping permitido.")
 
@@ -117,8 +114,8 @@ async def handle_client(websocket, path):
 
 # Función principal para ejecutar el servidor WebSocket
 async def main():
-    server = await websockets.serve(handle_client, "0.0.0.0", 8765)
-    print("Servidor WebSocket iniciado en ws:172.168.3.131:8765")
+    server = await websockets.serve(handle_client, "192.168.30.181", 8765)
+    print("Servidor WebSocket iniciado en ws://192.168.30.181:8765")
 
     try:
         while True:

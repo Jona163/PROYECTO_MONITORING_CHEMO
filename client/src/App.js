@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Conectar al servidor WebSocket
-    ws.current = new WebSocket('ws:172.168.0.167:8765');
+    ws.current = new WebSocket('ws://localhost:8765');
 
     ws.current.onopen = () => {
       console.log('Conexión establecida');
@@ -29,26 +29,36 @@ function App() {
         setImage(data.data);
       } else if (data.type === 'message') {
         // Recibir y mostrar mensajes
-        setMessages((prevMessages) => [...prevMessages, { text: data.data, type: 'message', self: false }]);
+        setMessages((prevMessages) => [
+          ...prevMessages, 
+          { text: data.data, type: 'message', self: false }
+        ]);
       } else if (data.type === 'file') {
         // Recibir archivos
         setMessages((prevMessages) => [
           ...prevMessages,
-          { text: `Archivo recibido: ${data.fileName}`, type: 'file', self: false, fileName: data.fileName, fileData: data.fileData },
+          { 
+            text: `Archivo recibido: ${data.fileName}`, 
+            type: 'file', 
+            self: false, 
+            fileName: data.fileName, 
+            fileData: data.fileData 
+          }
         ]);
       } else if (data.type === 'command') {
         // Ejecutar comandos recibidos del maestro
-        if (data.command === 'block_input') {
-          console.log('Bloquear entrada');
-          // Aquí iría la lógica para bloquear la entrada (por ejemplo, deshabilitar teclado y ratón)
-          // Podrías usar alguna librería como robotjs para bloquear la entrada si es necesario.
-        } else if (data.command === 'unblock_input') {
-          console.log('Desbloquear entrada');
-          // Aquí iría la lógica para desbloquear la entrada
-        } else if (data.command === 'shutdown') {
-          console.log('Apagar PC');
-          // Aquí iría la lógica para apagar la PC
-          // Puedes usar `shutdown` en el sistema operativo o una librería para eso.
+        switch (data.command) {
+          case 'block_input':
+            console.log('Bloquear entrada');
+            break;
+          case 'unblock_input':
+            console.log('Desbloquear entrada');
+            break;
+          case 'shutdown':
+            console.log('Apagar PC');
+            break;
+          default:
+            console.log('Comando desconocido');
         }
       }
     };
@@ -64,15 +74,20 @@ function App() {
     };
 
     return () => {
-      ws.current.close();
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, []);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (newMessage.trim() !== '' && ws.current.readyState === WebSocket.OPEN) {
+    if (newMessage.trim() && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'message', data: newMessage }));
-      setMessages((prevMessages) => [...prevMessages, { text: newMessage, type: 'message', self: true }]);
+      setMessages((prevMessages) => [
+        ...prevMessages, 
+        { text: newMessage, type: 'message', self: true }
+      ]);
       setNewMessage('');
     }
   };
@@ -92,7 +107,16 @@ function App() {
       reader.onloadend = () => {
         const fileData = reader.result.split(',')[1];
         ws.current.send(JSON.stringify({ type: 'file', fileName, fileData }));
-        setMessages((prevMessages) => [...prevMessages, { text: `Archivo enviado: ${fileName}`, type: 'file', self: true, fileName, fileData }]);
+        setMessages((prevMessages) => [
+          ...prevMessages, 
+          { 
+            text: `Archivo enviado: ${fileName}`, 
+            type: 'file', 
+            self: true, 
+            fileName, 
+            fileData 
+          }
+        ]);
         setFile(null);
         setFileName('');
       };

@@ -4,9 +4,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #282c34;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
+  background-color: #000000; /* Fondo negro */
+  color: #00FF41; /* Verde neón */
+  font-family: 'Courier New', Courier, monospace; /* Fuente tipo consola */
+  overflow: hidden;
 }
 
 .App {
@@ -18,13 +19,14 @@ body {
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8); /* Transparencia oscura */
+  border: 1px solid #00FF41;
+  box-shadow: 0 0 20px #00FF41;
   padding: 20px;
   width: 80%;
   max-width: 800px;
   text-align: center;
+  border-radius: 10px;
 }
 
 .image-container {
@@ -32,6 +34,7 @@ body {
   width: 100%;
   height: 450px;
   overflow: hidden;
+  border: 1px solid #00FF41;
   border-radius: 10px;
   margin-top: 20px;
 }
@@ -40,11 +43,13 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: grayscale(80%) brightness(1.2);
 }
 
 .chat-container {
   margin-top: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #00FF41;
   border-radius: 10px;
   padding: 10px;
 }
@@ -52,39 +57,56 @@ body {
 .messages {
   max-height: 200px;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #00FF41;
   border-radius: 10px;
   padding: 10px;
   margin: 10px 0;
+  color: #00FF41;
 }
 
 input {
   width: 70%;
   padding: 10px;
   margin-right: 5px;
+  background: #000;
+  color: #00FF41;
+  border: 1px solid #00FF41;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 button {
   padding: 10px;
+  background-color: #00FF41;
+  color: #000;
+  border: 1px solid #00FF41;
+  border-radius: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #009933;
 }
 
 .message {
   padding: 10px;
   margin-bottom: 10px;
-  border-radius: 10px;
+  border-radius: 5px;
   max-width: 80%;
   word-wrap: break-word;
+  background-color: #001a00;
 }
 
 .message.sent {
-  background-color: #80DEEA;
   align-self: flex-end;
+  border: 1px solid #00FF41;
 }
 
 .message.received {
-  background-color: #ffffff;
   align-self: flex-start;
-  border: 1px solid #ddd;
+  border: 1px solid #00FF41;
 }
 
 .form-container {
@@ -95,73 +117,52 @@ button {
 
 input[type="text"] {
   flex-grow: 1;
-  padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
   margin-right: 10px;
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
 }
 
 .file-container {
   margin-top: 20px;
   padding: 10px;
-  border: 1px solid #cccccc50;
+  border: 1px solid #00FF41;
   border-radius: 10px;
-  background-color: #f9f9f945;
-}
-
-.file-container h2 {
-  margin-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .custom-file-upload {
   display: inline-block;
   padding: 8px 12px;
   cursor: pointer;
-  background-color: #80DEEA;
-  color: white;
+  background-color: #00FF41;
+  color: black;
   border: none;
   border-radius: 5px;
-  text-align: center;
   font-size: 16px;
-  margin-bottom: 10px;
+  transition: background-color 0.3s ease;
 }
 
 .custom-file-upload:hover {
-  background-color: #72d0e0;
+  background-color: #009933;
 }
 
 .send-file-button {
   display: inline-block;
   padding: 8px 12px;
   cursor: pointer;
-  background-color: #008CBA;
-  color: white;
+  background-color: #00FF41;
+  color: black;
   border: none;
   border-radius: 5px;
-  text-align: center;
   font-size: 16px;
-  margin-top: 10px;
+  transition: background-color 0.3s ease;
 }
 
 .send-file-button:hover {
-  background-color: #007B9A;
+  background-color: #009933;
 }
 
 .messages .message a {
-  color: #007bff;
+  color: #00FF41;
   text-decoration: none;
   font-weight: bold;
 }
@@ -178,7 +179,7 @@ button:hover {
   }
 
   .image-container {
-    height: 300px; /* Reduce la altura en pantallas pequeñas */
+    height: 300px;
   }
 
   .form-container {
@@ -189,7 +190,7 @@ button:hover {
   input {
     width: 100%;
     margin-right: 0;
-    margin-bottom: 10px; /* Añadir espacio en la parte inferior en dispositivos móviles */
+    margin-bottom: 10px;
   }
 
   button {
@@ -200,10 +201,6 @@ button:hover {
   .messages {
     max-height: 150px;
   }
-
-  .file-container {
-    padding: 8px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -213,7 +210,7 @@ button:hover {
   }
 
   .image-container {
-    height: 200px; /* Ajuste adicional para pantallas muy pequeñas */
+    height: 200px;
   }
 
   .message {

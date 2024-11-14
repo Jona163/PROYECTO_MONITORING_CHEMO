@@ -4,9 +4,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #282c34;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
+  background-color: #000000; /* Fondo negro */
+  color: #00FF41; /* Verde neón */
+  font-family: 'Courier New', Courier, monospace; /* Fuente estilo consola */
+  overflow: hidden;
 }
 
 .App {
@@ -18,73 +19,93 @@ body {
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.9); /* Fondo oscuro con transparencia */
+  border: 1px solid #00FF41;
+  box-shadow: 0 0 15px #00FF41;
   padding: 20px;
   width: 80%;
-  max-width: 800px;
+  max-width: 700px;
   text-align: center;
+  border-radius: 10px;
 }
 
-.image-container {
-  position: relative;
-  width: 100%;
-  height: 450px;
-  overflow: hidden;
-  border-radius: 10px;
+.title {
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: #00FF41;
+  text-shadow: 0 0 8px #00FF41;
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 20px;
 }
 
-.live-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.chat-container {
-  margin-top: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+input[type="text"], input[type="password"] {
+  width: 80%;
   padding: 10px;
-}
-
-.messages {
-  max-height: 200px;
-  overflow-y: auto;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px 0;
-}
-
-input {
-  width: 70%;
-  padding: 10px;
-  margin-right: 5px;
+  background-color: #000;
+  color: #00FF41;
+  border: 1px solid #00FF41;
+  border-radius: 5px;
+  margin-right: 10px;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 button {
+  padding: 10px 20px;
+  background-color: #00FF41;
+  color: #000;
+  border: 1px solid #00FF41;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #009933;
+}
+
+.message-box {
+  margin-top: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #00FF41;
+  border-radius: 10px;
   padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  color: #00FF41;
+  text-align: left;
 }
 
 .message {
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  max-width: 80%;
+  padding: 8px;
+  margin-bottom: 8px;
+  background-color: #001a00;
+  border: 1px solid #00FF41;
+  border-radius: 5px;
   word-wrap: break-word;
 }
 
 .message.sent {
-  background-color: #80DEEA;
-  align-self: flex-end;
+  text-align: right;
 }
 
 .message.received {
-  background-color: #ffffff;
-  align-self: flex-start;
-  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.link {
+  color: #00FF41;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 .form-container {
@@ -93,116 +114,41 @@ button {
   margin-top: 10px;
 }
 
-input[type="text"] {
-  flex-grow: 1;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  margin-right: 10px;
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.file-container {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #cccccc50;
-  border-radius: 10px;
-  background-color: #f9f9f945;
-}
-
-.file-container h2 {
-  margin-bottom: 10px;
-}
-
-.custom-file-upload {
+.file-upload {
   display: inline-block;
   padding: 8px 12px;
-  cursor: pointer;
-  background-color: #80DEEA;
-  color: white;
+  background-color: #00FF41;
+  color: black;
   border: none;
   border-radius: 5px;
-  text-align: center;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.custom-file-upload:hover {
-  background-color: #72d0e0;
-}
-
-.send-file-button {
-  display: inline-block;
-  padding: 8px 12px;
   cursor: pointer;
-  background-color: #008CBA;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 16px;
-  margin-top: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background-color 0.3s ease;
 }
 
-.send-file-button:hover {
-  background-color: #007B9A;
+.file-upload:hover {
+  background-color: #009933;
 }
 
-.messages .message a {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.messages .message a:hover {
-  text-decoration: underline;
-}
-
-/* Media queries para hacer el diseño responsivo */
+/* Media queries para un diseño responsivo */
 @media (max-width: 768px) {
   .container {
     width: 90%;
     padding: 15px;
   }
 
-  .image-container {
-    height: 300px; /* Reduce la altura en pantallas pequeñas */
-  }
-
-  .form-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  input {
+  input[type="text"], input[type="password"] {
     width: 100%;
     margin-right: 0;
-    margin-bottom: 10px; /* Añadir espacio en la parte inferior en dispositivos móviles */
+    margin-bottom: 10px;
   }
 
   button {
     width: 100%;
-    padding: 10px;
   }
 
-  .messages {
+  .message-box {
     max-height: 150px;
-  }
-
-  .file-container {
-    padding: 8px;
   }
 }
 
@@ -212,15 +158,11 @@ button:hover {
     padding: 10px;
   }
 
-  .image-container {
-    height: 200px; /* Ajuste adicional para pantallas muy pequeñas */
-  }
-
   .message {
     max-width: 100%;
   }
 
-  .custom-file-upload, .send-file-button {
+  .file-upload {
     font-size: 14px;
     padding: 6px 10px;
   }

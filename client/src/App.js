@@ -10,81 +10,105 @@ function App() {
   const [fileName, setFileName] = useState('');
 
   const ws = useRef(null);
-  const imageRef = useRef(null);
+  const reconnectInterval = useRef(null);
 
   useEffect(() => {
-    // Conectar al servidor WebSocket
-    ws.current = new WebSocket('ws://localhost:8765');
+    const connectWebSocket = () => {
+      ws.current = new WebSocket('ws://localhost:8765');
 
-    ws.current.onopen = () => {
-      console.log('Conexión establecida');
-      setConnectionStatus('Conectado');
-    };
+      ws.current.onopen = () => {
+        console.log('Conexión establecida');
+        setConnectionStatus('Conectado');
+        if (reconnectInterval.current) {
+          clearInterval(reconnectInterval.current);
+          reconnectInterval.current = null;
+        }
+      };
 
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === 'image') {
-        // Mostrar imagen de la pantalla remota
-        setImage(data.data);
-      } else if (data.type === 'message') {
-        // Recibir y mostrar mensajes
-        setMessages((prevMessages) => [
-          ...prevMessages, 
-          { text: data.data, type: 'message', self: false }
-        ]);
-      } else if (data.type === 'file') {
-        // Recibir archivos
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { 
-            text: `Archivo recibido: ${data.fileName}`, 
-            type: 'file', 
-            self: false, 
-            fileName: data.fileName, 
-            fileData: data.fileData 
+      ws.current.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'image') {
+            // Mostrar imagen recibida
+            setImage(data.data);
+          } else if (data.type === 'message') {
+            // Recibir mensajes
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { text: data.data, type: 'message', self: false },
+            ]);
+          } else if (data.type === 'file') {
+            // Recibir archivos
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                text: `Archivo recibido: ${data.fileName}`,
+                type: 'file',
+                self: false,
+                fileName: data.fileName,
+                fileData: data.fileData,
+              },
+            ]);
+          } else if (data.type === 'command') {
+            // Procesar comandos
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { text: `Comando ejecutado: ${data.command}`, type: 'command', self: false },
+            ]);
+            switch (data.command) {
+              case 'block_input':
+                console.log('Bloquear entrada');
+                break;
+              case 'unblock_input':
+                console.log('Desbloquear entrada');
+                break;
+              case 'shutdown':
+                console.log('Apagar PC');
+                break;
+              default:
+                console.log('Comando desconocido');
+            }
           }
-        ]);
-      } else if (data.type === 'command') {
-        // Ejecutar comandos recibidos del servidor
-        executeCommand(data.command);
-      }
+        } catch (error) {
+          console.error('Error procesando mensaje:', error);
+        }
+      };
+
+      ws.current.onerror = (error) => {
+        console.error('Error en WebSocket:', error);
+        setConnectionStatus('Error en la conexión');
+      };
+
+      ws.current.onclose = () => {
+        console.log('Conexión cerrada');
+        setConnectionStatus('Desconectado');
+        // Intentar reconectar después de 5 segundos
+        if (!reconnectInterval.current) {
+          reconnectInterval.current = setInterval(() => connectWebSocket(), 5000);
+        }
+      };
     };
 
-    ws.current.onerror = (error) => {
-      console.error('Error en WebSocket:', error);
-      setConnectionStatus('Error en la conexión');
-    };
-
-    ws.current.onclose = () => {
-      console.log('Conexión cerrada');
-      setConnectionStatus('Desconectado');
-    };
+    connectWebSocket();
 
     return () => {
       if (ws.current) {
         ws.current.close();
       }
+      if (reconnectInterval.current) {
+        clearInterval(reconnectInterval.current);
+      }
     };
   }, []);
-
-  const executeCommand = (command) => {
-    try {
-      // Usamos `new Function` para ejecutar comandos más seguros, en vez de `eval`
-      const script = new Function(command);
-      script();  // Ejecutar el comando recibido
-    } catch (error) {
-      console.error('Error al ejecutar el comando:', error);
-    }
-  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'message', data: newMessage }));
       setMessages((prevMessages) => [
-        ...prevMessages, 
-        { text: newMessage, type: 'message', self: true }
+        ...prevMessages,
+        { text: newMessage, type: 'message', self: true },
       ]);
       setNewMessage('');
     }
@@ -106,14 +130,14 @@ function App() {
         const fileData = reader.result.split(',')[1];
         ws.current.send(JSON.stringify({ type: 'file', fileName, fileData }));
         setMessages((prevMessages) => [
-          ...prevMessages, 
-          { 
-            text: `Archivo enviado: ${fileName}`, 
-            type: 'file', 
-            self: true, 
-            fileName, 
-            fileData 
-          }
+          ...prevMessages,
+          {
+            text: `Archivo enviado: ${fileName}`,
+            type: 'file',
+            self: true,
+            fileName,
+            fileData,
+          },
         ]);
         setFile(null);
         setFileName('');
@@ -129,12 +153,7 @@ function App() {
         <p>Estado de la conexión: {connectionStatus}</p>
         {image ? (
           <div className="image-container">
-            <img 
-              src={`data:image/jpeg;base64,${image}`} 
-              alt="Pantalla en vivo" 
-              className="live-image" 
-              ref={imageRef} 
-            />
+            <img src={`data:image/jpeg;base64,${image}`} alt="Pantalla en vivo" className="live-image" />
           </div>
         ) : (
           <p>Conectando al servidor...</p>
@@ -147,10 +166,12 @@ function App() {
               <div key={index} className={`message ${msg.self ? 'sent' : 'received'}`}>
                 {msg.type === 'message' ? (
                   msg.text
-                ) : (
+                ) : msg.type === 'file' ? (
                   <a href={`data:application/octet-stream;base64,${msg.fileData}`} download={msg.fileName}>
                     Descargar {msg.fileName}
                   </a>
+                ) : (
+                  <span>{msg.text}</span>
                 )}
               </div>
             ))}

@@ -1,131 +1,149 @@
 import asyncio
 import websockets
-import base64
-import os
 import json
-import time
-import subprocess  # Para comandos del sistema como apagado
+import base64
+import subprocess  # Para ejecutar comandos del sistema
+import ctypes      # Para manejar bloqueo/desbloqueo de teclado y ratón en Windows
+import os          # Para manejar modificaciones del archivo hosts (bloqueo de sitios web)
+import time        # Para registrar tiempos en el ping
 
-# Ruta para almacenar archivos enviados por el cliente
-UPLOAD_FOLDER = "uploads/"
-# Ruta para los scripts PowerShell
-SCRIPT_FOLDER = "scripts/"
+# Dirección del servidor maestro
+SERVER_URI = "ws://192.168.30.181:8765"
 
-# Asegúrate de que la carpeta de uploads exista
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Archivo hosts en sistemas Windows
+HOSTS_FILE = r"C:\Windows\System32\drivers\etc\hosts"
 
-# Lista de conexiones activas
-clients = set()
-
-# Función para bloquear y desbloquear el teclado y el ratón usando PowerShell
+# Función para bloquear y desbloquear teclado y ratón
 def toggle_keyboard_mouse(block=True):
-    script_name = "block_input.ps1" if block else "unblock_input.ps1"
-    script_path = os.path.join(SCRIPT_FOLDER, script_name)
     try:
-        subprocess.run(["powershell", "-File", script_path], check=True)
-        print("Teclado y ratón bloqueados." if block else "Teclado y ratón desbloqueados.")
+        user32 = ctypes.windll.User32
+        user32.BlockInput(block)
+        action = "bloqueados" if block else "desbloqueados"
+        print(f"Teclado y ratón {action}.")
     except Exception as e:
-        print(f"Error ejecutando {script_name}: {e}")
+        print(f"Error al cambiar el estado del teclado y ratón: {e}")
 
-# Función para enviar la pantalla (en formato de imagen base64)
-async def send_image(websocket):
+# Función para bloquear un sitio web
+def block_website(domain):
     try:
-        # Simula una imagen de pantalla en vivo, reemplaza esto por un método real
-        while True:
-            with open("screenshot.jpg", "rb") as image_file:
-                encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
-                image_message = json.dumps({"type": "image", "data": encoded_image})
-                await websocket.send(image_message)
-            await asyncio.sleep(1)  # Enviar imagen cada 1 segundo
+        with open(HOSTS_FILE, "a") as hosts_file:
+            hosts_file.write(f"127.0.0.1 {domain}\n")
+        print(f"Sitio bloqueado: {domain}")
     except Exception as e:
-        print(f"Error al enviar la imagen: {e}")
+        print(f"Error al bloquear sitio: {e}")
 
-# Función para apagar la PC
-def shutdown_pc():
+# Función para desbloquear un sitio web
+def unblock_website(domain):
     try:
-        print("Apagando PC...")
-        subprocess.run("shutdown /s /t 1", shell=True, check=True)
+        with open(HOSTS_FILE, "r") as hosts_file:
+            lines = hosts_file.readlines()
+        with open(HOSTS_FILE, "w") as hosts_file:
+            for line in lines:
+                if domain not in line:
+                    hosts_file.write(line)
+        print(f"Sitio desbloqueado: {domain}")
     except Exception as e:
-        print(f"Error al intentar apagar la PC: {e}")
+        print(f"Error al desbloquear sitio: {e}")
 
-# Función para manejar los mensajes de los clientes
-async def handle_client(websocket, path):
-    clients.add(websocket)
-    print(f"Nuevo cliente conectado: {websocket.remote_address}")
-
+# Función para realizar ping a un host
+def perform_ping(host):
     try:
-        # Envía la pantalla al cliente
-        asyncio.create_task(send_image(websocket))
+        print(f"Realizando ping a {host}...")
+        start_time = time.time()
+        response = subprocess.run(
+            ["ping", "-n", "1", host],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if response.returncode == 0:
+            duration = time.time() - start_time
+            print(f"Ping exitoso a {host} en {duration:.2f} segundos.")
+        else:
+            print(f"Ping fallido a {host}.")
+    except Exception as e:
+        print(f"Error al realizar ping: {e}")
 
-        # Recibir mensajes y comandos desde el cliente maestro
+# Función para manejar mensajes del servidor maestro
+async def handle_server_commands(websocket):
+    try:
         async for message in websocket:
-            data = json.loads(message)
+            try:
+                data = json.loads(message)
 
-            # Manejar mensajes de chat
-            if data["type"] == "message":
-                for client in clients:
-                    if client != websocket:
-                        await client.send(json.dumps({"type": "message", "data": data["data"]}))
+                # Procesar comandos del servidor maestro
+                if data["type"] == "command":
+                    action = data["action"]
+                    print(f"Recibido comando: {action}")
 
-            # Manejar archivos
-            elif data["type"] == "file":
-                file_data = base64.b64decode(data["fileData"])
-                file_path = os.path.join(UPLOAD_FOLDER, data["fileName"])
+                    # Apagar la PC
+                    if action == "shutdown":
+                        print("Ejecutando apagado...")
+                        subprocess.run("shutdown /s /t 1", shell=True, check=True)
 
-                with open(file_path, "wb") as file:
-                    file.write(file_data)
+                    # Bloquear teclado y ratón
+                    elif action == "block_input":
+                        toggle_keyboard_mouse(block=True)
 
-                for client in clients:
-                    if client != websocket:
-                        await client.send(json.dumps({
-                            "type": "file",
-                            "fileName": data["fileName"],
-                            "fileData": base64.b64encode(file_data).decode("utf-8")
-                        }))
+                    # Desbloquear teclado y ratón
+                    elif action == "unblock_input":
+                        toggle_keyboard_mouse(block=False)
 
-            # Comando de apagado
-            elif data["action"] == "shutdown":
-                shutdown_pc()
+                    # Bloquear sitio web
+                    elif action == "block_website":
+                        domain = data["domain"]
+                        block_website(domain)
 
-            # Bloqueo de teclado y ratón
-            elif data["action"] == "block_input":
-                toggle_keyboard_mouse(block=True)
+                    # Desbloquear sitio web
+                    elif action == "unblock_website":
+                        domain = data["domain"]
+                        unblock_website(domain)
 
-            # Desbloqueo de teclado y ratón
-            elif data["action"] == "unblock_input":
-                toggle_keyboard_mouse(block=False)
+                    # Realizar ping
+                    elif action == "ping":
+                        host = data["host"]
+                        perform_ping(host)
 
-            # Bloqueo de sitios
-            elif data["action"] == "block_sites":
-                restricted_sites = data.get("sites", [])
-                print(f"Acceso restringido a: {restricted_sites}")
+                    # Ejecutar un archivo recibido
+                    elif action == "execute_file":
+                        file_name = data["fileName"]
+                        file_data = base64.b64decode(data["fileData"])
+                        file_path = f"./{file_name}"
 
-            # Control de ping
-            elif data["action"] == "allow_ping":
-                print("Ping permitido.")
+                        # Guardar el archivo en el sistema local
+                        with open(file_path, "wb") as file:
+                            file.write(file_data)
+                        print(f"Archivo recibido y guardado: {file_path}")
 
-            elif data["action"] == "block_ping":
-                print("Ping bloqueado.")
+                        # Ejecutar el archivo (asegúrate de que sea seguro)
+                        subprocess.run(file_path, shell=True)
+
+                    # Comando desconocido
+                    else:
+                        print(f"Comando no reconocido: {action}")
+
+                else:
+                    print(f"Tipo de mensaje no reconocido: {data}")
+
+            except Exception as e:
+                print(f"Error al procesar mensaje: {e}")
 
     except websockets.exceptions.ConnectionClosed as e:
-        print(f"Cliente desconectado: {websocket.remote_address} - {e}")
-    finally:
-        clients.remove(websocket)
+        print(f"Conexión cerrada: {e}")
 
-# Función principal para ejecutar el servidor WebSocket
+# Función principal del cliente
 async def main():
-    server = await websockets.serve(handle_client, "192.168.30.181", 8765)
-    print("Servidor WebSocket iniciado en ws://192.168.30.181:8765")
-
     try:
-        while True:
-            await asyncio.sleep(3600)  # Mantener el servidor activo
-    except KeyboardInterrupt:
-        print("Servidor detenido manualmente")
-        server.close()
-        await server.wait_closed()
+        print(f"Conectando al servidor maestro en {SERVER_URI}...")
+        async with websockets.connect(SERVER_URI) as websocket:
+            print("Conexión establecida.")
 
-# Ejecutar el servidor WebSocket
+            # Mantener la conexión abierta y escuchar mensajes
+            await handle_server_commands(websocket)
+
+    except Exception as e:
+        print(f"Error en el cliente: {e}")
+
+# Ejecutar el cliente
 if __name__ == "__main__":
     asyncio.run(main())
